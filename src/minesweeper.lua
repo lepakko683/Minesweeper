@@ -36,7 +36,7 @@ mineField = {}
 curLoc = 3 --index of the spot in mineField array that the "cursor" is over
 fieldWidth = 10 --in tiles
 fieldHeight = 10 --in tiles
-fieldMines = 5
+fieldMines = 15
 tileWidth = 0 --in pixels
 tileHeight = 0 --in pixels
 
@@ -140,9 +140,41 @@ function getMinesAround(index)
     return ret
 end
 
+function openAround(index)
+    if mineField[index] == 0 then
+        if openSpot(index) == false then
+            return
+        end
+        if index + fieldWidth < fieldWidth*fieldHeight then
+            openAround(index+fieldWidth)
+        end
+        if index - fieldWidth > -1 then
+            openAround(index-fieldWidth)
+        end
+        if index%fieldWidth < fieldWidth-1 then
+            openAround(index+1)
+        end
+        if index%fieldWidth > 0 then
+            openAround(index-1)
+        end
+    end
+end
+
+function openSpot(index)
+    local mAr = getMinesAround(index)
+    mineField[index] = 4 + mAr
+    screen:invalidate()
+    if mAr > 0 then
+        return false
+    else
+        return true
+    end
+end
+
 function checkSpot()
     if mineField[curLoc] == 0 then
-        mineField[curLoc] = 4 + getMinesAround(curLoc)
+        --mineField[curLoc] = 4 + getMinesAround(curLoc)
+        openAround(curLoc)
     end
     if mineField[curLoc] == 1 then
         playerDead = true
